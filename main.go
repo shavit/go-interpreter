@@ -1,10 +1,23 @@
 package main
 
 import (
-	"github.com/shavit/go-interpreter/token"
+	"fmt"
+	"os"
+	"os/user"
+
+	"github.com/shavit/go-interpreter/repl"
 )
 
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	var token *token.Token = &token.Token{}
-	println("Token:", token)
+	user, err := user.Current()
+	checkErr(err)
+
+	fmt.Println("   ____ PROGRAMMING LANGUAGE\n\n", user.Username, ", press Ctrl+C to exit")
+	repl.Start(os.Stdin, os.Stdout)
 }

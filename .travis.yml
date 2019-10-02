@@ -1,0 +1,15 @@
+language: go
+
+jobs:
+  include:
+
+    - stage: test
+      script:
+        - go test ./... -cover
+
+ #   - stage: deploy
+ #     provider: script
+ #     script: curl -sL https://git.io/goreleaser | bash
+ #     on:
+ #       tags: true
+ #       condition: $TRAVIS_OS_NAME = linux
