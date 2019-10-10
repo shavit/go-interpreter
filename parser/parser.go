@@ -43,7 +43,7 @@ func (p *Parser) Errors() []string {
 
 // peekError check for errors in the next token
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf(`Found %s, whlie expecting a token of %s`, p.peekToken.Type, t)
+	msg := fmt.Sprintf(`Found %s, whlie expecting the next token to be %s`, p.peekToken.Type, t)
 	p.errors = append(p.errors, msg)
 }
 
@@ -101,6 +101,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	// Skip the semicolon
+	// This will be replaced later, once the 
 	for !p.currentTokenIs(token.SEMICOLON){
 		p.nextToken()
 	}
@@ -124,6 +125,7 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.nextToken()
 		return true
 	} else {
+		p.peekError(t)
 		return false
 	}
 }

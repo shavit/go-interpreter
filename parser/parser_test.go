@@ -17,6 +17,7 @@ let someIdentifier = 390123;
 	p := New(l)
 
 	program := p.ParseProgram()
+	checkParserErrors(t, p)
 	if program == nil {
 		t.Error("Found nil while expecting a Program")
 		return
@@ -39,6 +40,19 @@ let someIdentifier = 390123;
 			return
 		}
 	}
+}
+
+func checkParserErrors(t *testing.T, p *Parser){
+	errors := p.Errors()
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("Found %d errors", len(errors))
+	for _, msg := range errors {
+		t.Errorf("Parser error: %q", msg)
+	}
+	t.FailNow()
 }
 
 func testLetStatements(t *testing.T, s ast.Statement, name string) bool {
