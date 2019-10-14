@@ -66,3 +66,17 @@ func (l *LetStatement) statementNode() {
 func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
 }
+
+type ReturnStatement struct {
+	Token       token.Token
+	ReturnValue Expression
+}
+
+// statementNode is a helper that checks that this is a statement
+func (rs *ReturnStatement) statementNode() {
+}
+
+// TokenLiteral returns the token literal
+func (rs *ReturnStatement) TokenLiteral() string {
+	return rs.Token.Literal
+}

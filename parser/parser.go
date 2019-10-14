@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	
+
 	"github.com/shavit/go-interpreter/ast"
 	"github.com/shavit/go-interpreter/lexer"
 	"github.com/shavit/go-interpreter/token"
@@ -15,9 +15,9 @@ import (
 //  they point to tokens instead of characters
 type Parser struct {
 	l *lexer.Lexer
-	
+
 	currentToken token.Token
-	peekToken token.Token
+	peekToken    token.Token
 
 	errors []string
 }
@@ -25,7 +25,7 @@ type Parser struct {
 // New creates a new parser from the lexer
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l: l,
+		l:      l,
 		errors: []string{},
 	}
 
@@ -77,6 +77,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -88,21 +90,36 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	// Check the peek only after the statement was created
 	//  since this function will change the parser state
-	if !p.expectPeek(token.IDENT){
+	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
 	stmt.Name = &ast.Identifier{
 		Token: p.currentToken,
 		Value: p.currentToken.Literal,
 	}
-	
-	if !p.expectPeek(token.ASSIGN){
+
+	if !p.expectPeek(token.ASSIGN) {
 		return nil
 	}
 
 	// Skip the semicolon
-	// This will be replaced later, once the 
-	for !p.currentTokenIs(token.SEMICOLON){
+	// This will be replaced later, once the
+	for !p.currentTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+// parseReturnStatement creates a return statement
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.currentToken}
+
+	// Go to the next token after the return statement
+	p.nextToken()
+
+	// Parse until the semicolon
+	for !p.currentTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 

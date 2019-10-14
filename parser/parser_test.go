@@ -7,7 +7,7 @@ import (
 	"github.com/shavit/go-interpreter/lexer"
 )
 
-func TestLetStatements(t *testing.T){
+func TestLetStatements(t *testing.T) {
 	input := `
 let x = 7;
 let y = 11;
@@ -42,7 +42,7 @@ let someIdentifier = 390123;
 	}
 }
 
-func checkParserErrors(t *testing.T, p *Parser){
+func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
 		return
@@ -78,4 +78,33 @@ func testLetStatements(t *testing.T, s ast.Statement, name string) bool {
 	}
 
 	return true
+}
+
+func TestReturnStatements(t *testing.T) {
+	input := `
+return 7;
+return 11;
+return 31234;
+return -1;
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 4 {
+		t.Fatalf("Found %d, while expecting 4 program statements", len(program.Statements))
+	}
+
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("Invalid statement. Found %q, while expecting returnStmt.TokenLiteral to be \"return\"", returnStmt.TokenLiteral())
+		}
+
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("Incorrect statement. Found %q, while expecting returnStmt.TokenLiteral to be \"return\"", returnStmt.TokenLiteral())
+		}
+	}
 }
