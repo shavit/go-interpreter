@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"bytes"
+
 	"github.com/shavit/go-interpreter/token"
 )
 
@@ -9,6 +11,9 @@ type Node interface {
 	//  which is a string.
 	// It will be used for debugging and testing
 	TokenLiteral() string
+
+	// String prints AST nodes for debugging
+	String() string
 }
 
 type Statement interface {
@@ -37,6 +42,17 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+// String prints AST nodes for debugging
+func (p *Program) String() string {
+	var buf bytes.Buffer
+
+	for _, s := range p.Statements {
+		buf.WriteString(s.String())
+	}
+
+	return buf.String()
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -49,6 +65,11 @@ func (li *Identifier) expressionNode() {
 // TokenLiteral returns the token value
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
+}
+
+// String returns teh string value of the identifier
+func (i *Identifier) String() string {
+	return i.Value
 }
 
 type LetStatement struct {
@@ -67,6 +88,21 @@ func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
 }
 
+// String prints AST nodes for debugging
+func (l *LetStatement) String() string {
+	var buf bytes.Buffer
+
+	buf.WriteString(l.TokenLiteral() + " ")
+	buf.WriteString(l.Name.String() + " = ")
+
+	if l.Value != nil {
+		buf.WriteString(l.Value.String())
+	}
+	buf.WriteString(";")
+
+	return buf.String()
+}
+
 type ReturnStatement struct {
 	Token       token.Token
 	ReturnValue Expression
@@ -79,4 +115,45 @@ func (rs *ReturnStatement) statementNode() {
 // TokenLiteral returns the token literal
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
+}
+
+// String prints AST nodes for debugging
+func (rs *ReturnStatement) String() string {
+	var buf bytes.Buffer
+
+	buf.WriteString(rs.TokenLiteral() + " ")
+
+	if rs.ReturnValue != nil {
+		buf.WriteString(rs.ReturnValue.String())
+	}
+
+	buf.WriteString(";")
+
+	return buf.String()
+}
+
+// ExpressionStatement allows the program to parse one line expressions
+//  for example: `a + b` is an expression statement, and the result is
+//  not assigned to a variable
+type ExpressionStatement struct {
+	Token      token.Token
+	Expression Expression
+}
+
+// statementNode is a helper that checks that this is a statement
+func (es *ExpressionStatement) statementNode() {
+}
+
+// TokenLiteral returns the token literal
+func (es *ExpressionStatement) TokenLiteral() string {
+	return es.Token.Literal
+}
+
+// String prints AST nodes for debugging
+func (es *ExpressionStatement) String() string {
+	if es.Expression == nil {
+		return ""
+	}
+
+	return es.Expression.String()
 }
