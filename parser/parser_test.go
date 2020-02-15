@@ -108,3 +108,36 @@ return -1;
 		}
 	}
 }
+
+// Identifiers will evaluate their value. They produce a value like any
+//  other expressions
+func TestIndentifierExpression(t *testing.T) {
+	input := "someIdentifier;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("Found %d, while expecting 1 statement", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Found %T, while expecting ast.ExpressionStatement in program.Statements[0]", program.Statements[0])
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("Found %T, while expecting exp to be *ast.Identifier", stmt.Expression)
+	}
+
+	if ident.Value != "someIdentifier" {
+		t.Errorf("Found %s, while expecting ident.Value to be  %s", ident.Value, "someIdentifier")
+	}
+
+	if ident.TokenLiteral() != "someIdentifier" {
+		t.Errorf("Found %s, while expecting ident.TokenLiteral to be %s", ident.TokenLiteral(), "someIdentifier")
+	}
+}

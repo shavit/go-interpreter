@@ -8,6 +8,19 @@ import (
 	"github.com/shavit/go-interpreter/token"
 )
 
+// iota because the order of the expressions matter
+//  for example, + have lower precedence than *
+const (
+	_ int = iota
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -x or !x
+	CALL        // someFunc(x)
+)
+
 //
 // Parser
 //
@@ -20,6 +33,9 @@ type Parser struct {
 	peekToken    token.Token
 
 	errors []string
+
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 // New creates a new parser from the lexer
@@ -28,6 +44,9 @@ func New(l *lexer.Lexer) *Parser {
 		l:      l,
 		errors: []string{},
 	}
+
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
 
 	// Two tokens to set the current and peek tokens
 	p.nextToken()
@@ -80,7 +99,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -126,6 +145,36 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
+// parseExpressionStatement parses expressions
+// This is the default parser
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.currentToken}
+
+	// Pass the lowest since nothing was parsed yet
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	// The semicolons are optional, to make the REPL simpler
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+// parseExpression parse individual expression from a statement
+// it checks if there is a parsing function for the current token
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.currentToken.Type]
+
+	if prefix == nil {
+		return nil
+	}
+
+	leftExp := prefix()
+
+	return leftExp
+}
+
 // currentTokenIs check the current token against a type
 func (p *Parser) currentTokenIs(t token.TokenType) bool {
 	return p.currentToken.Type == t
@@ -145,4 +194,24 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.peekError(t)
 		return false
 	}
+}
+
+type prefixParseFn func() ast.Expression
+
+// registerPrefix adds a parse function to the prefix function map
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+type infixParseFn func(ast.Expression) ast.Expression
+
+// registerInfix adds a parse function to the infix function map
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}
+
+// parseIdentifier returns an identifier with the current token, and
+//  the literal token value
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
 }
