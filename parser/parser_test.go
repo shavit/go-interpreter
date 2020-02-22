@@ -141,3 +141,32 @@ func TestIndentifierExpression(t *testing.T) {
 		t.Errorf("Found %s, while expecting ident.TokenLiteral to be %s", ident.TokenLiteral(), "someIdentifier")
 	}
 }
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := "7;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("Go %d, while expecting 1 statement", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Got %T, while expecting program.Statements[0] to be ast.ExpressionStatement", program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("Got %T, while expecting stmt.Expression to be *ast.IntegerLiteral", stmt.Expression)
+	}
+	if literal.Value != 7 {
+		t.Errorf("Got %d, while expecting literal.Value to be %d", literal.Value, 7)
+	}
+	if literal.TokenLiteral() != "7" {
+		t.Errorf("Got %s, while expecting literal.TokenLiteral to be %s", literal.TokenLiteral(), "7")
+	}
+}

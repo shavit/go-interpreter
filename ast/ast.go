@@ -157,3 +157,23 @@ func (es *ExpressionStatement) String() string {
 
 	return es.Expression.String()
 }
+
+// IntegerLiteral implements the Expression interface
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+// expressionNode() returns the expression node
+func (il *IntegerLiteral) expressionNode() {
+}
+
+// TokenLiteral() returns the integer token literal
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+// String() returns a string representation of Integer Literal
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/shavit/go-interpreter/ast"
 	"github.com/shavit/go-interpreter/lexer"
@@ -47,6 +48,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
 	// Two tokens to set the current and peek tokens
 	p.nextToken()
@@ -214,4 +216,20 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 //  the literal token value
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() (exp ast.Expression) {
+	value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("Could not parse %q as integer", p.currentToken.Literal)
+		p.errors = append(p.errors, msg)
+		return
+	}
+
+	exp = &ast.IntegerLiteral{
+		Token: p.currentToken,
+		Value: value,
+	}
+
+	return exp
 }
