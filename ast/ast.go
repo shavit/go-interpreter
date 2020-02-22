@@ -177,3 +177,61 @@ func (il *IntegerLiteral) TokenLiteral() string {
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
+
+// PrefixExpression implements the Expression interface
+type PrefixExpression struct {
+	Operator string
+	Right    Expression
+	Token    token.Token
+}
+
+// expressionNode() returns the expresision node
+func (pe *PrefixExpression) expressionNode() {
+}
+
+// TokenLiteral() returns the token literal
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+// String() returns the string representation
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+// InfixExpression implements the Expression interface
+type InfixExpression struct {
+	Left     Expression
+	Operator string
+	Right    Expression
+	Token    token.Token
+}
+
+// expressionNode() returns the expressionNode
+func (oe *InfixExpression) expressionNode() {
+}
+
+// TokenLiteral() returns the token literal
+func (oe *InfixExpression) TokenLiteral() string {
+	return oe.Token.Literal
+}
+
+// String() returns the string representation
+func (oe *InfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(oe.Left.String())
+	out.WriteString(" " + oe.Operator + " ")
+	out.WriteString(oe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}

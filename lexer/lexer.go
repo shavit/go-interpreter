@@ -148,7 +148,7 @@ func isLetter(ch byte) bool {
 // It only supports integers
 func (l *Lexer) readNumber() string {
 	position := l.position
-	if isDigit(l.ch) {
+	for isDigit(l.ch) {
 		l.readChar()
 	}
 
