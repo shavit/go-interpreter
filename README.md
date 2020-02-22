@@ -1,3 +1,3 @@
 # Go Interpreter
 
-[![Build Status](https://travis-ci.org/shavit/literate-waffle.svg?branch=master)](https://travis-ci.org/shavit/literate-waffle)
+[![Build Status](https://travis-ci.org/shavit/go-interpreter.svg?branch=master)](https://travis-ci.org/shavit/go-interpreter)
