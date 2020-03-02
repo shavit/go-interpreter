@@ -235,3 +235,23 @@ func (oe *InfixExpression) String() string {
 
 	return out.String()
 }
+
+// BooleanLiteral implements the Expression interface
+type BooleanLiteral struct {
+	Token token.Token
+	Value bool
+}
+
+// expressionNode() returns the expression node
+func (b *BooleanLiteral) expressionNode() {
+}
+
+// TokenLiteral() returns the boolean token literal
+func (b *BooleanLiteral) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+// String() returns a string representation of boolean literal
+func (b *BooleanLiteral) String() string {
+	return b.Token.Literal
+}
