@@ -312,3 +312,60 @@ func TestOPeratorPrecendenceParsing(t *testing.T) {
 		}
 	}
 }
+
+func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
+	ident, ok := exp.(*ast.Identifier)
+	if !ok {
+		t.Errorf("Found %T, whie expecting exp to be *ast.Identifier", exp)
+		return false
+	}
+
+	if ident.Value != value {
+		t.Errorf("Found %s, while expecting ident.Value to be %s", ident.Value, value)
+		return false
+	}
+
+	if ident.TokenLiteral() != value {
+		t.Errorf("Found %s, while expecting ident.TokenLiteral to be %s", ident.TokenLiteral(), value)
+		return false
+	}
+
+	return true
+}
+
+func testLiteralExpression(t *testing.T, exp ast.Expression, expect interface{}) bool {
+	switch v := expect.(type) {
+	case int:
+		return testIntegerLiteral(t, exp, int64(v))
+	case int64:
+		return testIntegerLiteral(t, exp, v)
+	case string:
+		return testIdentifier(t, exp, v)
+	}
+
+	t.Errorf("Unmatched type %T. Test not implemented.", exp)
+	return false
+}
+
+func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, operator string, right interface{}) bool {
+	opExp, ok := exp.(*ast.InfixExpression)
+	if !ok {
+		t.Errorf("Found %T(%s), while expecting exp to be ast.OperatorExpression", exp, exp)
+		return false
+	}
+
+	if !testLiteralExpression(t, opExp.Left, left) {
+		return false
+	}
+
+	if opExp.Operator != operator {
+		t.Errorf("Found %q, while expecting exp.Operator to be %s", opExp.Operator, opExp)
+		return false
+	}
+
+	if !testLiteralExpression(t, opExp.Right, right) {
+		return false
+	}
+
+	return true
+}
